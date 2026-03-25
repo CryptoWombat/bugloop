@@ -15,6 +15,8 @@ export interface UseBugloopOptions {
 export interface UseBugloopReturn {
   /** Submit a new support message (creates a ticket) */
   submit: (message: string, attachments?: AttachmentInput[]) => Promise<SubmitResult>
+  /** Upload a file and get back its URL */
+  uploadFile: (file: File) => Promise<AttachmentInput>
   /** List the current user's tickets */
   listTickets: (filter?: { status?: string; type?: string }) => Promise<Ticket[]>
   /** Get a ticket with its messages */
@@ -86,6 +88,39 @@ export function useBugloop(options?: UseBugloopOptions): UseBugloopReturn {
     [api],
   )
 
+  const uploadFile = useCallback(
+    async (file: File): Promise<AttachmentInput> => {
+      setLoading(true)
+      setError(null)
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const res = await fetch(`${basePath}/upload`, {
+          method: 'POST',
+          body: formData,
+        })
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({ error: res.statusText }))
+          throw new Error(body.error ?? `Upload failed: ${res.status}`)
+        }
+        const data = await res.json()
+        const isImage = file.type.startsWith('image/')
+        return {
+          url: data.url,
+          type: isImage ? 'screenshot' : 'file',
+          name: file.name,
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Upload failed'
+        setError(msg)
+        throw err
+      } finally {
+        setLoading(false)
+      }
+    },
+    [basePath],
+  )
+
   const listTickets = useCallback(
     async (filter?: { status?: string; type?: string }) => {
       const params = new URLSearchParams()
@@ -132,6 +167,7 @@ export function useBugloop(options?: UseBugloopOptions): UseBugloopReturn {
 
   return {
     submit,
+    uploadFile,
     listTickets,
     getTicket,
     resolve,

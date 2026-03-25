@@ -123,6 +123,17 @@ export function createHandler(config: BugloopHandlerConfig) {
       // All other POST routes require auth
       const user = await authenticate(request)
 
+      // POST /upload — upload a file attachment
+      if (segments[0] === 'upload') {
+        const formData = await request.formData()
+        const file = formData.get('file') as File | null
+        if (!file) {
+          return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+        }
+        const result = await config.storage.uploadAttachment(file, file.name)
+        return NextResponse.json(result)
+      }
+
       // POST / — submit a new support message
       if (segments.length === 0) {
         const body = (await request.json()) as {

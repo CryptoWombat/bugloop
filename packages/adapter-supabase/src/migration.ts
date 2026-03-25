@@ -43,6 +43,21 @@ create table if not exists bugloop_messages (
 
 create index if not exists idx_bugloop_messages_ticket on bugloop_messages (ticket_id, created_at);
 
+-- Storage bucket for attachments (Supabase Storage)
+insert into storage.buckets (id, name, public)
+values ('bugloop-attachments', 'bugloop-attachments', true)
+on conflict (id) do nothing;
+
+-- Allow authenticated users to upload to the bugloop-attachments bucket
+create policy "bugloop_upload" on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'bugloop-attachments');
+
+-- Allow public read access to bugloop attachments
+create policy "bugloop_read" on storage.objects for select
+  to public
+  using (bucket_id = 'bugloop-attachments');
+
 -- Optional: RLS policies (uncomment and customize for your auth setup)
 -- alter table bugloop_tickets enable row level security;
 -- alter table bugloop_messages enable row level security;
