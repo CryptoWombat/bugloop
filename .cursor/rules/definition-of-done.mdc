@@ -1,0 +1,44 @@
+---
+description: Mandatory — no completion reply until fully built, tested, and verified (every fix/feature)
+alwaysApply: true
+---
+
+# Definition of done (non-negotiable)
+
+## When you may speak to the user about a fix or feature
+
+For **every** bugfix, refactor, or feature — **no exceptions**:
+
+- You **must not** send a **final / completion** message (summary, "done", "here's what changed", "ready", "shipped", "verified", "all set", "finished", "complete") until **all** steps below are satisfied for **this** change.
+- You **may** send **brief in-progress** notes only if something is **blocking** and you must label them clearly: **"Blocked — not complete."**
+- If the work is not finished, do **not** sound like it is. Prefer: **"Still building / still running tests."**
+
+**Length of work does not matter.** Correctness and proof do.
+
+## Required before any completion message
+
+1. **`pnpm build`** — all packages compile with zero errors.
+2. **`pnpm test`** — entire test suite green; add/update tests for new or changed logic.
+3. **`pnpm typecheck`** — no type errors across the workspace.
+4. **Commit & push** — changes committed and pushed to `master`.
+5. **Final message content** must include: commands run, pass/fail, and **version + git short hash** (e.g. `v0.1.0 · d8fe280`).
+
+## Versioning
+
+- **Version format:** `{package.json version}` + git short hash (e.g. `v0.1.0 · d8fe280`).
+- Each package has its own `version` in `packages/*/package.json`. Keep them in sync.
+- **Bump versions** for: milestone features (minor), breaking changes (major), bug fixes (patch).
+- When reporting "done", always include the version and git hash.
+
+## Scope = everything
+
+This applies to **one-line fixes** and **large features** alike. "Small change" is **not** an excuse to skip tests.
+
+## If something truly cannot be tested
+
+Say **exactly** what blocks verification, what you ran instead, and that the task is **not** fully verified — **do not** use completion language for that part.
+
+## Alignment
+
+- **CLAUDE.md** — Definition of Done, testing discipline, versioning.
+- **agent-execution.mdc** — you execute commands; you do not delegate to the user.

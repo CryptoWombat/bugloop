@@ -1,0 +1,37 @@
+---
+description: Versioning rules for all packages — bump, tag, and report with every change
+alwaysApply: true
+---
+
+# Versioning
+
+## Format
+
+`{package.json version}` + git short hash as build ID.
+Example: `v0.1.0 · d8fe280`
+
+## Package versions
+
+- Each package (`packages/*/package.json`) has its own `version` field.
+- Keep all package versions **in sync** until there is a deliberate reason to diverge.
+- Root `package.json` is private and does NOT carry a publishable version.
+
+## When to bump
+
+| Change type | Bump |
+|-------------|------|
+| Bug fix | Patch (0.0.x) |
+| New feature / milestone | Minor (0.x.0) |
+| Breaking API change | Major (x.0.0) |
+
+## How to bump
+
+1. Update `version` in **all** `packages/*/package.json` files.
+2. Commit with the version in the message (e.g. `chore: bump to v0.2.0`).
+3. Push to `master`.
+
+## Reporting
+
+When reporting "done" for any change, **always** include the version and git short hash so it's clear what was shipped. Example:
+
+> Shipped: **v0.2.0 · a1b2c3d**

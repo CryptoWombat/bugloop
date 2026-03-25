@@ -1,0 +1,36 @@
+---
+description: Agents must run builds, tests, and git operations themselves — never delegate to the user by default
+alwaysApply: true
+---
+
+# Agent execution (mandatory)
+
+## Default: you run it
+
+This environment has a **real shell with network access**. The user must **not** be asked to run things you can run yourself.
+
+**Always execute locally (non-exhaustive):**
+
+- Package / quality: `pnpm install`, `pnpm build`, `pnpm test`, `pnpm typecheck`
+- Git: `git status`, `git add`, `git commit`, `git push` when the workflow expects it
+- One-off scripts documented in `package.json` or `scripts/`
+
+If a command might fail (missing env, wrong machine), **try it**, read the error, fix or report the **specific** blocker — do not skip straight to "please run X."
+
+## When you may ask the user (narrow exceptions)
+
+Ask only when something is **impossible or unsafe** for the agent alone, for example:
+
+- **Secrets you cannot read** — e.g. they must paste a token or add a key
+- **Interactive human-only steps** — e.g. OAuth in a browser, SMS 2FA
+- **Irreversible production actions** they explicitly must own
+
+Even then: say exactly **what** is blocked and **what** you already tried.
+
+## Forbidden phrasing (unless a true exception applies)
+
+Do not end with: "Run `pnpm …`", "Build when ready", "Commit this", "Verify in the browser" as the **primary** handoff. **You** run and verify; the user gets results and logs.
+
+## Alignment
+
+- Matches **CLAUDE.md** "Definition of Done" and **`.cursor/rules/definition-of-done.mdc`**: the agent is the tester and operator unless an exception above applies.
