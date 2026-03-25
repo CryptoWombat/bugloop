@@ -13,6 +13,29 @@ import { TicketManager } from '@bugloop/core'
 import type { BugloopConfig } from '@bugloop/core'
 import { NextResponse } from 'next/server'
 
+async function verifyHmac(
+  body: string,
+  signature: string | null,
+  secret: string,
+): Promise<boolean> {
+  if (!signature) return false
+  const prefix = 'sha256='
+  if (!signature.startsWith(prefix)) return false
+  const sig = signature.slice(prefix.length)
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  )
+  const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body))
+  const expected = Array.from(new Uint8Array(mac))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  return sig === expected
+}
+
 export type BugloopHandlerConfig = BugloopConfig
 
 /**
@@ -102,9 +125,20 @@ export function createHandler(config: BugloopHandlerConfig) {
     try {
       const segments = parsePath(request.url)
 
-      // POST /callback — agent webhook (no user auth, uses shared secret)
+      // POST /callback — agent webhook (no user auth, verified by HMAC)
       if (segments[0] === 'callback') {
-        const body = (await request.json()) as {
+        const rawBody = await request.text()
+
+        // Verify HMAC signature if a callback secret is configured
+        if (config.callbackSecret) {
+          const signature = request.headers.get('x-bugloop-signature')
+          const valid = await verifyHmac(rawBody, signature, config.callbackSecret)
+          if (!valid) {
+            return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
+          }
+        }
+
+        const body = JSON.parse(rawBody) as {
           ticket_id: string
           state: 'succeeded' | 'failed'
           pr_url?: string

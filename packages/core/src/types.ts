@@ -198,6 +198,8 @@ export interface BugloopConfig {
     /** Max auto-retry attempts before escalating (default: 2) */
     maxRetries?: number
   }
+  /** Shared secret for HMAC verification of agent callbacks */
+  callbackSecret?: string
   /** Base path for API routes (default: '/api/support') */
   basePath?: string
 }
