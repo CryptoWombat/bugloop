@@ -1,0 +1,32 @@
+{
+  "name": "@bugloop/agent-github",
+  "version": "0.1.0",
+  "description": "GitHub Actions agent trigger for Bugloop auto-fix",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "workflows"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@bugloop/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@octokit/rest": ">=20.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@octokit/rest": { "optional": true }
+  },
+  "devDependencies": {
+    "@octokit/rest": "^21.0.0",
+    "typescript": "^5.8.0"
+  }
+}

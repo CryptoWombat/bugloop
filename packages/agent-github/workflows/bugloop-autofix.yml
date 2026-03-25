@@ -1,0 +1,59 @@
+# Copy this file to .github/workflows/bugloop-autofix.yml in your project.
+# Requires: ANTHROPIC_API_KEY secret in the repository.
+
+name: Bugloop Autofix
+
+on:
+  workflow_dispatch:
+    inputs:
+      ticket_id:
+        description: Bugloop ticket ID
+        required: true
+      report:
+        description: Structured bug report (JSON)
+        required: true
+      callback_url:
+        description: URL to POST results to
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Attempt fix with Claude Code
+        uses: anthropics/claude-code-action@v1
+        with:
+          prompt: |
+            A user reported a bug. Here is the structured report:
+
+            ${{ inputs.report }}
+
+            Investigate this bug in the codebase. If you can identify the cause
+            and write a fix:
+            1. Create a new branch named bugloop/fix-${{ inputs.ticket_id }}
+            2. Make the fix
+            3. Run existing tests to verify
+            4. Create a pull request
+
+            If you cannot fix it, explain why in your response.
+          max_turns: 20
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Report result
+        if: always()
+        run: |
+          STATUS=${{ job.status }}
+          PR_URL=$(gh pr list --head "bugloop/fix-${{ inputs.ticket_id }}" --json url --jq '.[0].url' 2>/dev/null || echo "")
+          curl -s -X POST "${{ inputs.callback_url }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"ticket_id\":\"${{ inputs.ticket_id }}\",\"state\":\"$STATUS\",\"pr_url\":\"$PR_URL\"}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

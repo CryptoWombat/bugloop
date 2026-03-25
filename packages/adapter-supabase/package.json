@@ -1,0 +1,29 @@
+{
+  "name": "@bugloop/adapter-supabase",
+  "version": "0.1.0",
+  "description": "Supabase storage and auth adapter for Bugloop",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "migrations"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@bugloop/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@supabase/supabase-js": ">=2.40.0"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.49.0",
+    "typescript": "^5.8.0"
+  }
+}
