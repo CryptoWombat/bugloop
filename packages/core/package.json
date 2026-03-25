@@ -2,6 +2,13 @@
   "name": "@bugloop/core",
   "version": "0.1.0",
   "description": "Core triage engine, ticket lifecycle, and agent bridge for Bugloop",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CryptoWombat/bugloop.git",
+    "directory": "packages/core"
+  },
+  "keywords": ["bugloop", "support", "triage", "ai", "bug-tracking", "agent"],
   "type": "module",
   "exports": {
     ".": {

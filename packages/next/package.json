@@ -2,6 +2,13 @@
   "name": "@bugloop/next",
   "version": "0.1.0",
   "description": "Next.js route handlers and React components for Bugloop",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CryptoWombat/bugloop.git",
+    "directory": "packages/next"
+  },
+  "keywords": ["bugloop", "nextjs", "support-widget", "react", "route-handler"],
   "type": "module",
   "exports": {
     ".": {

@@ -2,6 +2,13 @@
   "name": "@bugloop/agent-github",
   "version": "0.1.0",
   "description": "GitHub Actions agent trigger for Bugloop auto-fix",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CryptoWombat/bugloop.git",
+    "directory": "packages/agent-github"
+  },
+  "keywords": ["bugloop", "github-actions", "agent", "autofix", "claude-code"],
   "type": "module",
   "exports": {
     ".": {
