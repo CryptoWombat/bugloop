@@ -180,6 +180,7 @@ export class TicketManager {
       state: 'succeeded' | 'failed'
       prUrl?: string
       error?: string
+      sessionId?: string
     },
   ): Promise<void> {
     const ticket = await this.storage.getTicket(ticketId)
@@ -189,6 +190,7 @@ export class TicketManager {
       await this.storage.updateTicket(ticketId, {
         status: 'deployed',
         prUrl: result.prUrl,
+        agentSessionId: result.sessionId,
       })
 
       await this.storage.saveMessage(ticketId, {
@@ -196,7 +198,10 @@ export class TicketManager {
         content: `A fix has been prepared: ${result.prUrl}\n\nOnce deployed, I'll ask you to confirm the issue is resolved.`,
       })
     } else {
-      await this.storage.updateTicket(ticketId, { status: 'open' })
+      await this.storage.updateTicket(ticketId, {
+        status: 'open',
+        agentSessionId: result.sessionId,
+      })
 
       await this.storage.saveMessage(ticketId, {
         role: 'assistant',

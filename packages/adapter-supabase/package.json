@@ -1,6 +1,6 @@
 {
   "name": "@bugloop/adapter-supabase",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Supabase storage and auth adapter for Bugloop",
   "license": "MIT",
   "repository": {
@@ -8,7 +8,12 @@
     "url": "https://github.com/CryptoWombat/bugloop.git",
     "directory": "packages/adapter-supabase"
   },
-  "keywords": ["bugloop", "supabase", "adapter", "storage"],
+  "keywords": [
+    "bugloop",
+    "supabase",
+    "adapter",
+    "storage"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -18,7 +23,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "migrations"],
+  "files": [
+    "dist",
+    "migrations"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",

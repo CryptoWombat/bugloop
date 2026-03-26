@@ -143,12 +143,14 @@ export function createHandler(config: BugloopHandlerConfig) {
           state: 'succeeded' | 'failed'
           pr_url?: string
           error?: string
+          session_id?: string
         }
 
         await manager.handleAgentCallback(body.ticket_id, {
           state: body.state === 'succeeded' ? 'succeeded' : 'failed',
           prUrl: body.pr_url,
           error: body.error,
+          sessionId: body.session_id,
         })
 
         return NextResponse.json({ ok: true })

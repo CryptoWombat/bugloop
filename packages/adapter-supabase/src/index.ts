@@ -83,6 +83,7 @@ export class SupabaseStorageAdapter implements StorageAdapter {
 
     if (update.status !== undefined) row.status = update.status
     if (update.agentRunId !== undefined) row.agent_run_id = update.agentRunId
+    if (update.agentSessionId !== undefined) row.agent_session_id = update.agentSessionId
     if (update.prUrl !== undefined) row.pr_url = update.prUrl
     if (update.resolvedAt !== undefined) row.resolved_at = update.resolvedAt.toISOString()
     if (update.metadata !== undefined) row.metadata = update.metadata
@@ -216,6 +217,7 @@ function rowToTicket(row: any): Ticket {
     title: row.title,
     structuredReport: row.structured_report,
     agentRunId: row.agent_run_id ?? undefined,
+    agentSessionId: row.agent_session_id ?? undefined,
     prUrl: row.pr_url ?? undefined,
     userId: row.user_id,
     userEmail: row.user_email ?? undefined,

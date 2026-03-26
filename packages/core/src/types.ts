@@ -49,6 +49,7 @@ export interface Ticket {
   title: string
   structuredReport: StructuredReport
   agentRunId?: string
+  agentSessionId?: string
   prUrl?: string
   userId: string
   userEmail?: string
@@ -79,6 +80,7 @@ export interface TicketFilter {
 export interface TicketUpdate {
   status?: TicketStatus
   agentRunId?: string
+  agentSessionId?: string
   prUrl?: string
   resolvedAt?: Date
   metadata?: Record<string, unknown>

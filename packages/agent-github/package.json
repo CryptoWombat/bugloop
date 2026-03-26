@@ -1,6 +1,6 @@
 {
   "name": "@bugloop/agent-github",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "GitHub Actions agent trigger for Bugloop auto-fix",
   "license": "MIT",
   "repository": {
@@ -8,7 +8,13 @@
     "url": "https://github.com/CryptoWombat/bugloop.git",
     "directory": "packages/agent-github"
   },
-  "keywords": ["bugloop", "github-actions", "agent", "autofix", "claude-code"],
+  "keywords": [
+    "bugloop",
+    "github-actions",
+    "agent",
+    "autofix",
+    "claude-code"
+  ],
   "type": "module",
   "exports": {
     ".": {
@@ -18,7 +24,10 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "workflows"],
+  "files": [
+    "dist",
+    "workflows"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -32,7 +41,9 @@
     "@octokit/rest": ">=20.0.0"
   },
   "peerDependenciesMeta": {
-    "@octokit/rest": { "optional": true }
+    "@octokit/rest": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@octokit/rest": "^21.0.0",
