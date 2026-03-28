@@ -68,6 +68,8 @@ export class GitHubAgentAdapter implements AgentAdapter {
             ticket_id: ticket.id,
             report: JSON.stringify(sanitizedReport),
             callback_url: this.callbackUrl,
+            // Pass session_id for follow-up conversations (resume previous agent session)
+            ...(ticket.agentSessionId ? { session_id: ticket.agentSessionId } : {}),
           },
         }),
       },
@@ -156,7 +158,10 @@ function mapGitHubStatus(
 
 export const WORKFLOW_TEMPLATE = `# .github/workflows/bugloop-autofix.yml
 # Bugloop auto-fix workflow — triggered by the Bugloop SDK when a bug is reported.
-# Requires: ANTHROPIC_API_KEY secret in the repository.
+# Auth (in priority order):
+#   1. CLAUDE_LONG_LIVED_TOKEN → mapped to CLAUDE_CODE_OAUTH_TOKEN env var
+#   2. ANTHROPIC_API_KEY — pay-per-use API key
+# Optional: BUGLOOP_CALLBACK_SECRET — enables HMAC-SHA256 signed callbacks
 
 name: Bugloop Autofix
 
@@ -172,11 +177,21 @@ on:
       callback_url:
         description: URL to POST results to
         required: true
+      prompt:
+        description: Custom prompt (overrides default — used for follow-up messages)
+        required: false
+      session_id:
+        description: Claude session ID to resume (for follow-up conversations)
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   autofix:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -184,30 +199,52 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           prompt: |
-            A user reported a bug. Here is the structured report:
+            \${{ inputs.prompt || format('A user reported a bug. Here is the structured report:
 
-            \${{ inputs.report }}
+            {0}
 
             Investigate this bug in the codebase. If you can identify the cause
             and write a fix:
-            1. Create a new branch named bugloop/fix-\${{ inputs.ticket_id }}
+            1. Create a new branch named bugloop/fix-{1}
             2. Make the fix
             3. Run existing tests to verify
             4. Create a pull request
 
-            If you cannot fix it, explain why in your response.
+            If you cannot fix it, explain why in your response.', inputs.report, inputs.ticket_id) }}
           max_turns: 20
         env:
           ANTHROPIC_API_KEY: \${{ secrets.ANTHROPIC_API_KEY }}
+          CLAUDE_CODE_OAUTH_TOKEN: \${{ secrets.CLAUDE_LONG_LIVED_TOKEN }}
 
       - name: Report result
         if: always()
         run: |
-          STATUS=\${{ job.status }}
+          # Map GitHub Actions job.status → bugloop expected values
+          RAW_STATUS=\${{ job.status }}
+          if [ "\\$RAW_STATUS" = "success" ]; then
+            STATUS="succeeded"
+          elif [ "\\$RAW_STATUS" = "failure" ]; then
+            STATUS="failed"
+          else
+            STATUS="\\$RAW_STATUS"
+          fi
+
           PR_URL=$(gh pr list --head "bugloop/fix-\${{ inputs.ticket_id }}" --json url --jq '.[0].url' 2>/dev/null || echo "")
-          curl -s -X POST "\${{ inputs.callback_url }}" \\
-            -H "Content-Type: application/json" \\
-            -d "{\\"ticket_id\\":\\"\${{ inputs.ticket_id }}\\",\\"state\\":\\"$STATUS\\",\\"pr_url\\":\\"$PR_URL\\"}"
+          SESSION_ID=$(cat /tmp/claude-session-id 2>/dev/null || echo "")
+          PAYLOAD="{\\"ticket_id\\":\\"\${{ inputs.ticket_id }}\\",\\"state\\":\\"\\$STATUS\\",\\"pr_url\\":\\"\\$PR_URL\\",\\"session_id\\":\\"\\$SESSION_ID\\"}"
+
+          if [ -n "\\$BUGLOOP_CALLBACK_SECRET" ]; then
+            SIGNATURE=$(echo -n "\\$PAYLOAD" | openssl dgst -sha256 -hmac "\\$BUGLOOP_CALLBACK_SECRET" | awk '{print \\$2}')
+            curl -s -X POST "\${{ inputs.callback_url }}" \\
+              -H "Content-Type: application/json" \\
+              -H "X-Bugloop-Signature: sha256=\\$SIGNATURE" \\
+              -d "\\$PAYLOAD"
+          else
+            curl -s -X POST "\${{ inputs.callback_url }}" \\
+              -H "Content-Type: application/json" \\
+              -d "\\$PAYLOAD"
+          fi
         env:
           GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          BUGLOOP_CALLBACK_SECRET: \${{ secrets.BUGLOOP_CALLBACK_SECRET }}
 `
