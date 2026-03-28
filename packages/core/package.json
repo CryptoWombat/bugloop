@@ -1,6 +1,6 @@
 {
   "name": "@bugloop/core",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Core triage engine, ticket lifecycle, and agent bridge for Bugloop",
   "license": "MIT",
   "repository": {

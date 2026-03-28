@@ -1,6 +1,6 @@
 {
   "name": "@bugloop/adapter-supabase",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Supabase storage and auth adapter for Bugloop",
   "license": "MIT",
   "repository": {
